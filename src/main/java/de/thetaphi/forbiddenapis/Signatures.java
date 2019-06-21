@@ -78,6 +78,7 @@ public final class Signatures implements Constants {
   private final RelatedClassLookup lookup;
   private final Logger logger;
   private final boolean failOnUnresolvableSignatures;
+  private final boolean logMissingSignatures;
 
   /** Key is used to lookup forbidden signature in following formats:
    * <ul>
@@ -95,13 +96,14 @@ public final class Signatures implements Constants {
   private boolean forbidNonPortableRuntime = false;
 
   public Signatures(Checker checker) {
-    this(checker, checker.logger, checker.options.contains(Option.FAIL_ON_UNRESOLVABLE_SIGNATURES));
+    this(checker, checker.logger, checker.options.contains(Option.FAIL_ON_UNRESOLVABLE_SIGNATURES), checker.options.contains(Option.LOG_MISSING_SIGNATURES));
   }
   
-  public Signatures(RelatedClassLookup lookup, Logger logger, boolean failOnUnresolvableSignatures) {
+  public Signatures(RelatedClassLookup lookup, Logger logger, boolean failOnUnresolvableSignatures, boolean logMissingSignatures) {
     this.lookup = lookup;
     this.logger = logger;
     this.failOnUnresolvableSignatures = failOnUnresolvableSignatures;
+    this.logMissingSignatures = logMissingSignatures;
   }
   
   static String getKey(String internalClassName) {
@@ -211,7 +213,7 @@ public final class Signatures implements Constants {
   }
   
   private void reportMissingSignatureClasses(Set<String> missingClasses) {
-    if (missingClasses.isEmpty()) {
+    if (missingClasses.isEmpty() || !logMissingSignatures) {
       return;
     }
     logger.warn("Some signatures were ignored because the following classes were not found on classpath:");

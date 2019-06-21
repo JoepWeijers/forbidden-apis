@@ -54,6 +54,7 @@ public final class Checker implements RelatedClassLookup, Constants {
     FAIL_ON_MISSING_CLASSES,
     FAIL_ON_VIOLATION,
     FAIL_ON_UNRESOLVABLE_SIGNATURES,
+    LOG_MISSING_SIGNATURES,
     DISABLE_CLASSLOADING_CACHE
   }
 

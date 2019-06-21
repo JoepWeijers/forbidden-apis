@@ -141,12 +141,21 @@ public abstract class AbstractCheckMojo extends AbstractMojo implements Constant
   
   /**
    * Fail the build if a signature is not resolving. If this parameter is set to
-   * to false, then such signatures are silently ignored. This is useful in multi-module Maven
+   * to false, then such signatures are ignored. This is useful in multi-module Maven
    * projects where only some modules have the dependency to which the signature file(s) apply.
    * @since 1.4
    */
   @Parameter(required = false, defaultValue = "true")
   private boolean failOnUnresolvableSignatures;
+  
+  /**
+   * Output a warning in the log if a signature is missing. If this parameter is set to
+   * to false, then such signatures are not logged at all. This is useful in multi-module Maven
+   * projects where only some modules have the dependency to which the signature file(s) apply.
+   * @since 2.7
+   */
+  @Parameter(required = false, defaultValue = "true")
+  private boolean logMissingSignatures;
 
   /**
    * Fail the build if violations have been found. Defaults to {@code true}.
@@ -323,6 +332,7 @@ public abstract class AbstractCheckMojo extends AbstractMojo implements Constant
       if (failOnMissingClasses) options.add(FAIL_ON_MISSING_CLASSES);
       if (failOnViolation) options.add(FAIL_ON_VIOLATION);
       if (failOnUnresolvableSignatures) options.add(FAIL_ON_UNRESOLVABLE_SIGNATURES);
+      if (logMissingSignatures) options.add(LOG_MISSING_SIGNATURES);
       if (disableClassloadingCache) options.add(DISABLE_CLASSLOADING_CACHE);
       final Checker checker = new Checker(log, loader, options);
       
