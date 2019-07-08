@@ -156,6 +156,15 @@ public abstract class AbstractCheckMojo extends AbstractMojo implements Constant
    */
   @Parameter(required = false, defaultValue = "true")
   private boolean logMissingSignatures;
+  
+  /**
+   * Output a warning in the log if a the classes directory is missing or does not contain class 
+   * files. If this parameter is set to to false, then such directories are not logged at all.
+   * This is useful in multi-module Maven projects where not all modules have test classes.
+   * @since 2.8
+   */
+  @Parameter(required = false, defaultValue = "true")
+  private boolean logMissingClassFiles;
 
   /**
    * Fail the build if violations have been found. Defaults to {@code true}.
@@ -333,6 +342,7 @@ public abstract class AbstractCheckMojo extends AbstractMojo implements Constant
       if (failOnViolation) options.add(FAIL_ON_VIOLATION);
       if (failOnUnresolvableSignatures) options.add(FAIL_ON_UNRESOLVABLE_SIGNATURES);
       if (logMissingSignatures) options.add(LOG_MISSING_SIGNATURES);
+      if (logMissingClassFiles) options.add(LOG_MISSING_CLASS_FILES);
       if (disableClassloadingCache) options.add(DISABLE_CLASSLOADING_CACHE);
       final Checker checker = new Checker(log, loader, options);
       
@@ -357,7 +367,9 @@ public abstract class AbstractCheckMojo extends AbstractMojo implements Constant
       log.info("Scanning for classes to check...");
       final File classesDirectory = getClassesDirectory();
       if (!classesDirectory.exists()) {
-        log.warn("Classes directory does not exist, forbiddenapis check skipped: " + classesDirectory);
+        if (logMissingClassFiles) {
+          log.warn("Classes directory does not exist, forbiddenapis check skipped: " + classesDirectory);
+        }
         return;
       }
       final DirectoryScanner ds = new DirectoryScanner();
@@ -369,9 +381,11 @@ public abstract class AbstractCheckMojo extends AbstractMojo implements Constant
       ds.scan();
       final String[] files = ds.getIncludedFiles();
       if (files.length == 0) {
-        log.warn(String.format(Locale.ENGLISH,
-          "No classes found in '%s' (includes=%s, excludes=%s), forbiddenapis check skipped.",
-          classesDirectory.toString(), Arrays.toString(includes), Arrays.toString(excludes)));
+        if (logMissingClassFiles) {
+          log.warn(String.format(Locale.ENGLISH,
+            "No classes found in '%s' (includes=%s, excludes=%s), forbiddenapis check skipped.",
+            classesDirectory.toString(), Arrays.toString(includes), Arrays.toString(excludes)));
+        }
         return;
       }
       
